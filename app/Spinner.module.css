@@ -1,0 +1,47 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  animation: rotate 1.2s linear infinite;
+}
+
+.path {
+  stroke: #4b6cb7;
+  stroke-linecap: round;
+  animation: dash 1.5s ease-in-out infinite;
+}
+
+.text {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #888;
+  font-style: italic;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
