@@ -3,11 +3,19 @@ import { fetchNotes } from '@/lib/api';
 import type { NoteTag } from '@/types/note';
 
 interface Props {
-  params: { tag: string };
+  params: { slug: string[] | string }; // ← підтримка [...slug]
 }
 
 export default async function Page({ params }: Props) {
-  const tag = params.tag.charAt(0).toUpperCase() + params.tag.slice(1).toLowerCase() as NoteTag;
+  // Отримуємо перший сегмент slug
+  const slugArray = Array.isArray(params.slug) ? params.slug : [params.slug];
+  const rawTag = slugArray[0]; // перший елемент з [...slug]
+
+  if (!rawTag) {
+    return <p>❌ No tag provided in the URL.</p>;
+  }
+
+  const tag = (rawTag.charAt(0).toUpperCase() + rawTag.slice(1).toLowerCase()) as NoteTag;
 
   try {
     const data = await fetchNotes({ page: 1, tag });
