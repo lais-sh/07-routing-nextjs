@@ -8,13 +8,12 @@ import { fetchNotes } from '@/lib/api';
 import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';
 import SearchBox from '@/components/SearchBox/SearchBox';
-import NoteModal from '@/components/NoteModal/NoteModal';
 import NoteForm from '@/components/NoteForm/NoteForm';
 
-import type { FetchNotesResponse } from '@/lib/api';
+import type { FetchNotesValues } from '@/types/note';
 
 interface NotesClientProps {
-  initialData: FetchNotesResponse;
+  initialData: FetchNotesValues;
   tag?: string;
 }
 
@@ -25,15 +24,11 @@ export default function NotesClient({ initialData, tag }: NotesClientProps) {
 
   const [debouncedSearch] = useDebounce(search, 500);
 
-  const { data, isLoading, isError } = useQuery({
+  const { data = initialData, isError } = useQuery({
     queryKey: ['notes', page, debouncedSearch, tag],
-    queryFn: () => fetchNotes({
-      page,
-      search: debouncedSearch,
-      tag,
-    }),
+    queryFn: () => fetchNotes({ page, search: debouncedSearch, tag }),
     initialData,
-    placeholderData: previous => previous,
+    placeholderData: (prev) => prev,
   });
 
   const handleSearch = (query: string) => {
@@ -41,25 +36,23 @@ export default function NotesClient({ initialData, tag }: NotesClientProps) {
     setSearch(query);
   };
 
-  if (isLoading && !data) {
-    return <p>Loading notes...</p>;
-  }
-
   if (isError) {
     return <p style={{ color: 'red' }}>Failed to load notes.</p>;
   }
 
   return (
     <>
-      <button onClick={() => setIsModalOpen(true)}>
-        ➕ New Note
-      </button>
+      <button onClick={() => setIsModalOpen(true)}>➕ New Note</button>
 
       <SearchBox onSearch={handleSearch} />
 
-      <NoteList notes={data?.notes || []} />
+      {data.notes.length > 0 ? (
+        <NoteList notes={data.notes} />
+      ) : (
+        <p>No notes found.</p>
+      )}
 
-      {data?.totalPages > 1 && (
+      {data.totalPages > 1 && (
         <Pagination
           currentPage={page}
           totalPages={data.totalPages}
@@ -68,9 +61,49 @@ export default function NotesClient({ initialData, tag }: NotesClientProps) {
       )}
 
       {isModalOpen && (
-        <NoteModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <NoteForm onClose={() => setIsModalOpen(false)} />
-        </NoteModal>
+        <div
+          role="dialog"
+          aria-modal="true"
+          onClick={(e) => e.target === e.currentTarget && setIsModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+        >
+          <div
+            style={{
+              position: 'relative',
+              background: '#fff',
+              padding: 20,
+              borderRadius: 8,
+              minWidth: 320,
+              maxWidth: 560,
+              width: '90%',
+            }}
+          >
+            <NoteForm onClose={() => setIsModalOpen(false)} />
+            <button
+              aria-label="Close modal"
+              onClick={() => setIsModalOpen(false)}
+              style={{
+                position: 'absolute',
+                top: 8,
+                right: 10,
+                border: 'none',
+                background: 'transparent',
+                fontSize: 20,
+                cursor: 'pointer',
+              }}
+            >
+              ✖
+            </button>
+          </div>
+        </div>
       )}
     </>
   );
