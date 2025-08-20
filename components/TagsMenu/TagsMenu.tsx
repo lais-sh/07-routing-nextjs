@@ -1,60 +1,38 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState } from 'react';
-import styles from './TagsMenu.module.css';
+import Link from "next/link";
+import { useState } from "react";
+import styles from "./TagsMenu.module.css";
 
-const noteCategories = ['Work', 'Personal', 'Meeting', 'Shopping', 'Todo'];
-
-function TagLink({
-  label,
-  href,
-  onClick,
-}: {
-  label: string;
-  href: string;
-  onClick: () => void;
-}) {
-  return (
-    <li className={styles.item}>
-      <Link href={href} className={styles.link} onClick={onClick}>
-        {label}
-      </Link>
-    </li>
-  );
-}
+const TAGS = ["Work", "Personal", "Meeting", "Shopping", "Todo"] as const;
 
 export default function TagsMenu() {
-  const [menuVisible, setMenuVisible] = useState(false);
-
-  const switchMenu = () => setMenuVisible((v) => !v);
-
-  const closeMenu = () => setMenuVisible(false);
+  const [open, setOpen] = useState(false);
+  const toggle = () => setOpen((v) => !v);
 
   return (
-    <div className={styles.wrapper}>
-      <button
-        className={styles.button}
-        onClick={switchMenu}
-        aria-expanded={menuVisible}
-      >
-        Tags ▾
+    <div className={styles.menuContainer}>
+      <button className={styles.menuButton} onClick={toggle}>
+        Notes ▾
       </button>
 
-      {menuVisible && (
-        <ul className={styles.list}>
-          <TagLink
-            label="All"
-            href="/notes"
-            onClick={closeMenu}
-          />
-          {noteCategories.map((category) => (
-            <TagLink
-              key={category}
-              label={category}
-              href={`/notes/filter/${category.toLowerCase()}`}
-              onClick={closeMenu}
-            />
+      {open && (
+        <ul className={styles.menuList}>
+          <li className={styles.menuItem}>
+            <Link href="/notes/filter/All" className={styles.menuLink} onClick={toggle}>
+              All notes
+            </Link>
+          </li>
+          {TAGS.map((tag) => (
+            <li className={styles.menuItem} key={tag}>
+              <Link
+                href={`/notes/filter/${tag}`}
+                className={styles.menuLink}
+                onClick={toggle}
+              >
+                {tag}
+              </Link>
+            </li>
           ))}
         </ul>
       )}

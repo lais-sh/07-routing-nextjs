@@ -4,16 +4,19 @@ import { useState } from 'react';
 import { useDebounce } from 'use-debounce';
 import { useQuery } from '@tanstack/react-query';
 import { fetchNotes } from '@/lib/api';
+import Modal from '@/components/Modal/Modal';
+import { normalizeTag } from '@/lib/tags';
 
 import NoteList from '@/components/NoteList/NoteList';
 import Pagination from '@/components/Pagination/Pagination';
 import SearchBox from '@/components/SearchBox/SearchBox';
 import NoteForm from '@/components/NoteForm/NoteForm';
 
-import type { FetchNotesValues } from '@/types/note';
+import type { NotesResponse } from '@/lib/api';
+import type { NoteTag } from '@/lib/tags';
 
 interface NotesClientProps {
-  initialData: FetchNotesValues;
+  initialData: NotesResponse;
   tag?: string;
 }
 
@@ -24,9 +27,12 @@ export default function NotesClient({ initialData, tag }: NotesClientProps) {
 
   const [debouncedSearch] = useDebounce(search, 500);
 
+  const safeTag: NoteTag | 'All' | undefined = normalizeTag(tag);
+
   const { data = initialData, isError } = useQuery({
-    queryKey: ['notes', page, debouncedSearch, tag],
-    queryFn: () => fetchNotes({ page, search: debouncedSearch, tag }),
+    queryKey: ['notes', { page, search: debouncedSearch, tag: safeTag }],
+    queryFn: () =>
+      fetchNotes({ page, search: debouncedSearch, tag: safeTag }),
     initialData,
     placeholderData: (prev) => prev,
   });
@@ -61,49 +67,9 @@ export default function NotesClient({ initialData, tag }: NotesClientProps) {
       )}
 
       {isModalOpen && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          onClick={(e) => e.target === e.currentTarget && setIsModalOpen(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-          }}
-        >
-          <div
-            style={{
-              position: 'relative',
-              background: '#fff',
-              padding: 20,
-              borderRadius: 8,
-              minWidth: 320,
-              maxWidth: 560,
-              width: '90%',
-            }}
-          >
-            <NoteForm onClose={() => setIsModalOpen(false)} />
-            <button
-              aria-label="Close modal"
-              onClick={() => setIsModalOpen(false)}
-              style={{
-                position: 'absolute',
-                top: 8,
-                right: 10,
-                border: 'none',
-                background: 'transparent',
-                fontSize: 20,
-                cursor: 'pointer',
-              }}
-            >
-              ✖
-            </button>
-          </div>
-        </div>
+        <Modal onClose={() => setIsModalOpen(false)}>
+          <NoteForm onClose={() => setIsModalOpen(false)} />
+        </Modal>
       )}
     </>
   );

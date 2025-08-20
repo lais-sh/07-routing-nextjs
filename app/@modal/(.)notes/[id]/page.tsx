@@ -1,29 +1,21 @@
-export const dynamic = "force-dynamic";
-
-import { notFound } from "next/navigation";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { fetchNoteById } from "@/lib/api";
-import { HydrationBoundary, dehydrate, QueryClient } from "@tanstack/react-query";
-import NoteDetailsClient from "./NoteDetails.client";
+import NotePreviewClient from "./NotePreview.client";
 
-interface Props {
-  params: { id: string };
-}
+type Params = Promise<{ id: string }>;
 
-export default async function NoteDetailsPage({ params }: Props) {
-  const id = Number(params.id);
-  if (Number.isNaN(id)) {
-    notFound();
-  }
+export default async function NoteModalPage({ params }: { params: Params }) {
+  const { id } = await params;
 
   const qc = new QueryClient();
   await qc.prefetchQuery({
-    queryKey: ["noteDetails", id],
+    queryKey: ["note", id],
     queryFn: () => fetchNoteById(id),
   });
 
   return (
     <HydrationBoundary state={dehydrate(qc)}>
-  <NoteDetailsClient noteId={id} />
-</HydrationBoundary>
+      <NotePreviewClient noteId={id} onClose={() => {}} />
+    </HydrationBoundary>
   );
 }
