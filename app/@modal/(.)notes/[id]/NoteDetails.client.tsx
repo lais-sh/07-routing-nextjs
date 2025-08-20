@@ -1,41 +1,37 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 import { fetchNoteById } from "@/lib/api";
 import type { Note } from "@/types/note";
-import styles from "./NoteDetails.module.css";
 
-interface Props {
-  noteId: string;
-}
+type Props = {
+  noteId?: string;
+};
 
 export default function NoteDetailsClient({ noteId }: Props) {
-  const { data: note, isLoading, isError, error } = useQuery<Note>({
-    queryKey: ["note", noteId],
-    queryFn: () => fetchNoteById(noteId),
+  const params = useParams<{ id: string }>();
+  const id = noteId ?? params?.id;      // ← всегда string
+  if (!id) return null;
+
+  const { data, isLoading, isError, error } = useQuery<Note>({
+    queryKey: ["note", id],
+    queryFn: () => fetchNoteById(id),
     refetchOnMount: false,
   });
 
-  if (isLoading) return <p>Loading...</p>;
-
-  if (isError || !note) {
-    return (
-      <p style={{ color: "red" }}>
-        Failed to load note {error instanceof Error ? `: ${error.message}` : ""}
-      </p>
-    );
-  }
+  if (isLoading) return <p>Loading…</p>;
+  if (isError || !data)
+    return <p style={{ color: "red" }}>
+      Failed to load note{error instanceof Error ? `: ${error.message}` : ""}
+    </p>;
 
   return (
-    <div className={styles.wrapper}>
-      <h1 className={styles.title}>{note.title}</h1>
-      <p className={styles.content}>{note.content}</p>
-      <p>
-        <strong>Tag:</strong> {note.tag}
-      </p>
-      <p>
-        <em>Created at: {new Date(note.createdAt).toLocaleString()}</em>
-      </p>
-    </div>
+    <article>
+      <h1>{data.title}</h1>
+      <p>{data.content}</p>
+      <p><strong>Tag:</strong> {data.tag}</p>
+      <p><em>{new Date(data.createdAt).toLocaleString()}</em></p>
+    </article>
   );
 }
