@@ -1,6 +1,6 @@
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import { fetchNoteById } from "@/lib/api";
-import NotePreviewClient from "./NotePreview.client";
+import NoteDetailsClient from "./NoteDetails.client";
 
 type Params = Promise<{ id: string }>;
 
@@ -15,7 +15,7 @@ export default async function NoteModalPage({ params }: { params: Params }) {
 
   return (
     <HydrationBoundary state={dehydrate(qc)}>
-      <NotePreviewClient noteId={id} onClose={() => {}} />
+      <NoteDetailsClient noteId={id} />
     </HydrationBoundary>
   );
 }

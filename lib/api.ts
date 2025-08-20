@@ -1,6 +1,5 @@
 import axios from "axios";
-import type { Note, NoteTag } from "@/types/note";
-import type { NewNote } from "@/types/note";
+import type { Note, NoteTag, NewNote } from "@/types/note";
 
 const API = axios.create({
   baseURL: "https://notehub-public.goit.study/api",
@@ -39,28 +38,16 @@ export async function fetchNotes({
 }
 
 export async function createNote(payload: NewNote): Promise<Note> {
-  const { data } = await API.post<Note>("/notes", payload, {
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
-    },
-  });
+  const { data } = await API.post<Note>("/notes", payload);
   return data;
 }
 
 export async function deleteNote(noteId: string): Promise<Note> {
-  const { data } = await API.delete<Note>(`/notes/${noteId}`, {
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
-    },
-  });
+  const { data } = await API.delete<Note>(`/notes/${noteId}`);
   return data;
 }
 
 export async function fetchNoteById(noteId: string): Promise<Note> {
-  const { data } = await API.get<Note>(`/notes/${noteId}`, {
-    headers: {
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_NOTEHUB_TOKEN}`,
-    },
-  });
+  const { data } = await API.get<Note>(`/notes/${noteId}`);
   return data;
 }
