@@ -11,7 +11,7 @@ type Props = {
 
 export default function NoteDetailsClient({ noteId }: Props) {
   const params = useParams<{ id: string }>();
-  const id = noteId ?? params?.id;      // ← всегда string
+  const id = noteId ?? params?.id;
   if (!id) return null;
 
   const { data, isLoading, isError, error } = useQuery<Note>({
@@ -22,9 +22,11 @@ export default function NoteDetailsClient({ noteId }: Props) {
 
   if (isLoading) return <p>Loading…</p>;
   if (isError || !data)
-    return <p style={{ color: "red" }}>
-      Failed to load note{error instanceof Error ? `: ${error.message}` : ""}
-    </p>;
+    return (
+      <p style={{ color: "red" }}>
+        Failed to load note{error instanceof Error ? `: ${error.message}` : ""}
+      </p>
+    );
 
   return (
     <article>
