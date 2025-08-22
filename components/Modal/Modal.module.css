@@ -1,16 +1,35 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0,0,0,.5);
   display: grid;
   place-items: center;
   z-index: 1000;
 }
 
-.content {
-  background: #fff;
-  padding: 24px;
+.dialog {
+  background: #111;
+  color: #fff;
+  width: min(720px, 92vw);
+  max-height: 86vh;
   border-radius: 12px;
-  max-width: 700px;
-  width: 100%;
+  overflow: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  position: relative;
+}
+
+.close {
+  position: absolute;
+  top: .5rem;
+  right: .5rem;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.body {
+  padding: 1.25rem 1.25rem 1.5rem;
 }

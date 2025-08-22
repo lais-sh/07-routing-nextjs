@@ -1,32 +1,40 @@
-import ReactPaginate from 'react-paginate';
-import styles from './Pagination.module.css';
+"use client";
 
-interface PaginationProps {
+import { type FC } from "react";
+import styles from "./Pagination.module.css";
+
+type Props = {
   currentPage: number;
   totalPages: number;
-  onPageChange: (selectedPage: number) => void;
-}
+  onPageChange: (next: number) => void;
+};
 
-export default function Pagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: PaginationProps) {
+const clamp = (v: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, v));
+
+const Pagination: FC<Props> = ({ currentPage, totalPages, onPageChange }) => {
+  if (!totalPages || totalPages <= 1) return null;
+
+  const prev = () => onPageChange(clamp(currentPage - 1, 1, totalPages));
+  const next = () => onPageChange(clamp(currentPage + 1, 1, totalPages));
+
   return (
-    <ReactPaginate
-      nextLabel="→"
-      previousLabel="←"
-      breakLabel="..."
-      pageCount={totalPages}
-      forcePage={currentPage - 1}
-      onPageChange={(e) => onPageChange(e.selected + 1)}
-      containerClassName={styles.pagination}
-      activeClassName={styles.active}
-      disabledClassName={styles.disabled}
-      previousClassName={styles.previous}
-      nextClassName={styles.next}
-      pageClassName={styles.page}
-      breakClassName={styles.break}
-    />
+    <nav className={styles.root} aria-label="Pagination">
+      <button className={styles.btn} onClick={prev} disabled={currentPage <= 1}>
+        ‹ Prev
+      </button>
+      <span className={styles.info}>
+        Page {currentPage} / {totalPages}
+      </span>
+      <button
+        className={styles.btn}
+        onClick={next}
+        disabled={currentPage >= totalPages}
+      >
+        Next ›
+      </button>
+    </nav>
   );
-}
+};
+
+export default Pagination;

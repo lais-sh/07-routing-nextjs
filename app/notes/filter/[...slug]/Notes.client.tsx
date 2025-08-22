@@ -12,29 +12,30 @@ import Pagination from '@/components/Pagination/Pagination';
 import SearchBox from '@/components/SearchBox/SearchBox';
 import NoteForm from '@/components/NoteForm/NoteForm';
 
-import type { NotesResponse } from '@/lib/api';
 import type { NoteTag } from '@/lib/tags';
 
 interface NotesClientProps {
-  initialData: NotesResponse;
+  /** Тег из сегмента маршрута; может быть undefined */
   tag?: string;
+  /** Початкова сторінка, що прийде із серверного компонента */
+  initialPage?: number;
 }
 
-export default function NotesClient({ initialData, tag }: NotesClientProps) {
-  const [page, setPage] = useState(1);
+export default function NotesClient({ tag, initialPage = 1 }: NotesClientProps) {
+  const [page, setPage] = useState(initialPage);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // debounce пошуку
   const [debouncedSearch] = useDebounce(search, 500);
 
+  // нормалізація тегу до типу NoteTag | 'All'
   const safeTag: NoteTag | 'All' | undefined = normalizeTag(tag);
 
-  const { data = initialData, isError } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['notes', { page, search: debouncedSearch, tag: safeTag }],
-    queryFn: () =>
-      fetchNotes({ page, search: debouncedSearch, tag: safeTag }),
-    initialData,
-    placeholderData: (prev) => prev,
+    queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedSearch, tag: safeTag }),
+    refetchOnMount: false, // опираємось на гідрацію
   });
 
   const handleSearch = (query: string) => {
@@ -42,28 +43,28 @@ export default function NotesClient({ initialData, tag }: NotesClientProps) {
     setSearch(query);
   };
 
-  if (isError) {
-    return <p style={{ color: 'red' }}>Failed to load notes.</p>;
-  }
-
   return (
     <>
       <button onClick={() => setIsModalOpen(true)}>➕ New Note</button>
 
       <SearchBox onSearch={handleSearch} />
 
-      {data.notes.length > 0 ? (
-        <NoteList notes={data.notes} />
-      ) : (
-        <p>No notes found.</p>
-      )}
+      {isLoading && <p>Loading…</p>}
+      {isError && <p style={{ color: 'red' }}>Failed to load notes.</p>}
 
-      {data.totalPages > 1 && (
-        <Pagination
-          currentPage={page}
-          totalPages={data.totalPages}
-          onPageChange={setPage}
-        />
+      {!!data?.notes?.length ? (
+        <>
+          <NoteList notes={data.notes} />
+          {data.totalPages > 1 && (
+            <Pagination
+              currentPage={page}
+              totalPages={data.totalPages}
+              onPageChange={setPage}
+            />
+          )}
+        </>
+      ) : (
+        !isLoading && <p>No notes found.</p>
       )}
 
       {isModalOpen && (
