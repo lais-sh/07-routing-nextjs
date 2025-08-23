@@ -1,51 +1,68 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
-import css from "./Modal.module.css";
+import styles from "./Modal.module.css";
 
 type Props = {
-  onClose?: () => void; // необов'язково — fallback на router.back()
+  isOpen: boolean;
+  onClose: () => void;
   children: React.ReactNode;
+  ariaLabel?: string;
 };
 
-export default function Modal({ onClose, children }: Props) {
-  const router = useRouter();
+export default function Modal({
+  isOpen,
+  onClose,
+  children,
+  ariaLabel = "Dialog",
+}: Props) {
+  const dialogRef = useRef<HTMLDivElement>(null);
 
-  const close = () => {
-    onClose ? onClose() : router.back();
-  };
-
-  // Закриття по Escape
   useEffect(() => {
+    if (!isOpen) return;
+
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
+      if (e.key === "Escape") onClose();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+    document.addEventListener("keydown", onKey);
 
-  // Клік по backdrop
-  const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) close();
-  };
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
-  const content = (
-    <div className={css.backdrop} onClick={onBackdrop} role="presentation">
+    const t = setTimeout(() => dialogRef.current?.focus(), 0);
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+      clearTimeout(t);
+    };
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className={styles.backdrop} onClick={onClose} role="presentation">
       <div
-        className={css.dialog}
+        ref={dialogRef}
+        className={styles.dialog}
         role="dialog"
         aria-modal="true"
-        aria-label="Note details"
+        aria-label={ariaLabel}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
       >
-        <button className={css.close} onClick={close} aria-label="Close modal">
+        <button
+          type="button"
+          className={styles.close}
+          onClick={onClose}
+          aria-label="Close"
+        >
           ×
         </button>
-        <div className={css.body}>{children}</div>
+        {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
-
-  return createPortal(content, document.body);
 }

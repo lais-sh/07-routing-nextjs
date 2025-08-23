@@ -1,31 +1,35 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { fetchNoteById } from "@/lib/api";
 import Modal from "@/components/Modal/Modal";
+import { fetchNoteById } from "@/lib/api";
+import type { Note } from "@/types/note";
 
-type Props = {
-  noteId: string;
-  onClose: () => void;
-};
+type Props = { id: string };
 
-export default function NotePreviewClient({ noteId, onClose }: Props) {
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["note", noteId],
-    queryFn: () => fetchNoteById(noteId),
-    refetchOnMount: false,
+export default function NotePreview({ id }: Props) {
+  const router = useRouter();
+
+  const { data, isLoading, isError } = useQuery<Note>({
+    queryKey: ["note", id],
+    queryFn: () => fetchNoteById(Number(id)) as Promise<Note>,
   });
 
+  const onClose = () => router.back();
+
   return (
-    <Modal onClose={onClose}>
+    <Modal isOpen onClose={onClose} ariaLabel="Note preview">
       {isLoading && <p>Loading…</p>}
       {isError && <p>Failed to load note.</p>}
       {data && (
-        <article>
+        <>
           <h2>{data.title}</h2>
-          <p>{data.content}</p>
-          <p><strong>Tag:</strong> {data.tag}</p>
-        </article>
+          <p style={{ whiteSpace: "pre-wrap" }}>{data.content}</p>
+          <div style={{ marginTop: 12 }}>
+            <button onClick={onClose}>Close</button>
+          </div>
+        </>
       )}
     </Modal>
   );

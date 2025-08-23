@@ -6,30 +6,22 @@
   place-items: center;
   z-index: 1000;
 }
-
 .dialog {
-  background: #111;
-  color: #fff;
-  width: min(720px, 92vw);
-  max-height: 86vh;
+  background: #fff;
   border-radius: 12px;
-  overflow: auto;
-  box-shadow: 0 10px 30px rgba(0,0,0,.6);
+  padding: 16px 20px;
+  max-width: 640px;
+  width: calc(100% - 32px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.2);
   position: relative;
 }
-
 .close {
   position: absolute;
-  top: .5rem;
-  right: .5rem;
+  right: 8px;
+  top: 8px;
   border: none;
   background: transparent;
-  color: inherit;
-  font-size: 1.75rem;
-  line-height: 1;
+  font-size: 24px;
   cursor: pointer;
-}
-
-.body {
-  padding: 1.25rem 1.25rem 1.5rem;
+  line-height: 1;
 }
