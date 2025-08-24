@@ -2,23 +2,23 @@ import { notFound } from "next/navigation";
 import { fetchNoteById } from "@/lib/api";
 import type { Note } from "@/types/note";
 
-type PageProps = {
-  params: { id: string };
-};
-
 function formatDT(v?: string) {
   if (!v) return "";
   const d = new Date(v);
   return Number.isNaN(d.valueOf()) ? v : d.toLocaleString();
 }
 
-export default async function NoteDetailsPage({ params }: PageProps) {
-  const id = params?.id;
+export default async function NoteDetailsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   if (!id) notFound();
 
   let note: Note | undefined;
   try {
-    note = await fetchNoteById(id); 
+    note = await fetchNoteById(id);
   } catch {
     notFound();
   }

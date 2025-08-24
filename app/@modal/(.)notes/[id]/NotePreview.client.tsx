@@ -13,7 +13,8 @@ export default function NotePreview({ id }: Props) {
 
   const { data, isLoading, isError } = useQuery<Note>({
     queryKey: ["note", id],
-    queryFn: () => fetchNoteById(Number(id)) as Promise<Note>,
+    queryFn: () => fetchNoteById(id),
+    refetchOnMount: false,
   });
 
   const onClose = () => router.back();
@@ -27,7 +28,9 @@ export default function NotePreview({ id }: Props) {
           <h2>{data.title}</h2>
           <p style={{ whiteSpace: "pre-wrap" }}>{data.content}</p>
           <div style={{ marginTop: 12 }}>
-            <button onClick={onClose}>Close</button>
+            <button type="button" onClick={onClose}>
+              Close
+            </button>
           </div>
         </>
       )}
