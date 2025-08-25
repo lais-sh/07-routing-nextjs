@@ -76,6 +76,7 @@ const Pagination: FC<Props> = ({ currentPage, totalPages, onPageChange }) => {
   return (
     <nav className={styles.root} aria-label="Pagination">
       <button
+        type="button"
         className={styles.btn}
         onClick={first}
         disabled={safeCurrent === 1}
@@ -85,6 +86,7 @@ const Pagination: FC<Props> = ({ currentPage, totalPages, onPageChange }) => {
       </button>
 
       <button
+        type="button"
         className={styles.btn}
         onClick={prev}
         disabled={safeCurrent === 1}
@@ -104,6 +106,7 @@ const Pagination: FC<Props> = ({ currentPage, totalPages, onPageChange }) => {
           </span>
         ) : (
           <button
+            type="button"
             key={p}
             className={`${styles.page} ${p === safeCurrent ? styles.active : ""}`}
             onClick={() => go(p)}
@@ -117,6 +120,7 @@ const Pagination: FC<Props> = ({ currentPage, totalPages, onPageChange }) => {
       )}
 
       <button
+        type="button"
         className={styles.btn}
         onClick={next}
         disabled={safeCurrent === totalPages}
@@ -126,6 +130,7 @@ const Pagination: FC<Props> = ({ currentPage, totalPages, onPageChange }) => {
       </button>
 
       <button
+        type="button"
         className={styles.btn}
         onClick={last}
         disabled={safeCurrent === totalPages}

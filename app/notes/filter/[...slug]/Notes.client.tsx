@@ -19,7 +19,10 @@ export default function NotesClient({ tag, initialPage = 1 }: Props) {
   const [page, setPage] = useState<number>(initialPage);
   const [query, setQuery] = useState<string>("");
 
-  // локальный дебаунс
+  useEffect(() => {
+    setPage(1);
+  }, [tag]);
+
   const [debounced, setDebounced] = useState("");
   useEffect(() => {
     const t = setTimeout(() => setDebounced(query.trim()), 300);
@@ -32,12 +35,9 @@ export default function NotesClient({ tag, initialPage = 1 }: Props) {
       fetchNotes({
         page,
         search: debounced || undefined,
-        tag, // api сам отбросит "All"
+        tag,
       }),
-    // v5:
     placeholderData: keepPreviousData,
-    // если у тебя v4, используй:
-    // keepPreviousData: true,
   });
 
   return (
@@ -54,9 +54,18 @@ export default function NotesClient({ tag, initialPage = 1 }: Props) {
         />
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <h1>Notes</h1>
-        <Link href="/notes/new">Create note</Link>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 12,
+        }}
+      >
+        <h1 style={{ margin: 0 }}>Notes</h1>
+        <Link href="/notes/new" id="create-note-btn">
+          Create note
+        </Link>
       </div>
 
       {isLoading && <p>Loading…</p>}
@@ -68,8 +77,12 @@ export default function NotesClient({ tag, initialPage = 1 }: Props) {
         !isLoading && <p>No notes found</p>
       )}
 
-      {data?.totalPages ? (
-        <Pagination currentPage={page}totalPages={data!.totalPages}onPageChange={setPage}/>
+      {data && data.totalPages > 1 ? (
+        <Pagination
+          currentPage={page}
+          totalPages={data.totalPages}
+          onPageChange={setPage}
+        />
       ) : null}
     </section>
   );
